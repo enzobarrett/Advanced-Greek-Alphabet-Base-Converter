@@ -2,10 +2,10 @@
  * Enzo Barrett
  * 
  * By using the entire lower and uppercase greek alphabet,
- * this programs allows the user to convert between bases
- * up to base 58.
+ * this program allows the user to convert from bases
+ * up to base 58 to decimal.
  *
- * Usage:
+ * Usage: ./basetodecimal <from-radix>
  *
  */
 
@@ -13,6 +13,7 @@
 #include <locale.h>
 #include <wchar.h>
 #include <assert.h>
+#include <stdlib.h>
 
 // stuct to hold greek characters with decimal value
 struct greekCharacters {
@@ -55,15 +56,16 @@ void init() {
 int char_to_int (wchar_t digit) {
     int x;
 
-    printf("%lc", digit);
-    //if ((int)digit >= 0x30 && (int)digit <= 0x39) 
-    //    return (int)digit-0x30;
+    // special case for numbers
+    if ((int)digit >= 0x30 && (int)digit <= 0x39) {
+        return (int)digit-0x30;
+    }
 
     // find matching record in struct
     for (int i = 0; i < 48; i++) {
-        if ((int)extChars[i].c == (int)digit)
-            printf("%d", extChars[i].value);
+        if (extChars[i].c == digit) {
             return extChars[i].value;
+        }
     }
 
     return -1;
@@ -71,10 +73,9 @@ int char_to_int (wchar_t digit) {
 
 // ascii_to_int(valueOfPrefix, radix)
 // valueOfPrefix: used for recursion, set to zero
-// radix: deprecated, set to 48
+// radix: the base of the number for std in
 //
 // convert unicode string entered into stdin to base 10
-// radix value is always set to 48
 int ascii_to_int (int valueOfPrefix, int radix) { 
     wchar_t c;
     c = getwchar();
@@ -104,17 +105,22 @@ void test() {
     assert(char_to_int(c) == 14);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     // set locale
-    printf("Locale is: %s\n", setlocale(LC_ALL, ""));
+    setlocale(LC_ALL, "");
 
     // init data stuctures
     init();
 
-    int radix = 16;
+    if (argc == 1) {
+        printf("Usage: ./basetodecimal <from-radix>\n");
+        return 0;
+    }
+
+    int radix = atoi(*++argv);
 
     puts("Enter your number, then press enter:");
-    printf("Base 10: %d\n", ascii_to_int(0, radix));
+    printf("Base %d: %d\n", radix, ascii_to_int(0, radix));
 
     //test();
 
